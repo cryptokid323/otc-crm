@@ -43,11 +43,8 @@ export default async function Pipeline() {
         </label>
       </div>
 
-      {stages.length === 0 ? (
-        <p className="text-gray-500">No chapters in pipeline</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {stages.map((stage) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {stages.map((stage) => {
             const stageChapters = grouped[stage]
             const showing = stageChapters.slice(0, 10)
             const remaining = stageChapters.length - showing.length
@@ -88,9 +85,8 @@ export default async function Pipeline() {
                 </div>
               </div>
             )
-          })}
-        </div>
-      )}
+        })}
+      </div>
     </div>
   )
 }
