@@ -5,12 +5,19 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function Recovery() {
-  const [bucket, setBucket] = useState<string>('1')
+  const [bucket, setBucket] = useState<string>('recent_one_touch')
   const [chapters, setChapters] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const buckets = ['recent_one_touch', 'stalled_reply', 'phone_handoff', 'followup_pending', 'qualified_handoff', 'not_contacted']
+  const bucketConfig = [
+    { key: 'recent_one_touch', label: 'Recent 1-Touch' },
+    { key: 'stalled_reply', label: 'Stalled Reply' },
+    { key: 'phone_handoff', label: 'Phone Handoff' },
+    { key: 'followup_pending', label: 'Followup Pending' },
+    { key: 'qualified_handoff', label: 'Qualified Handoff' },
+    { key: 'not_contacted', label: 'Not Contacted' },
+  ]
 
   useEffect(() => {
     async function fetch() {
@@ -41,18 +48,18 @@ export default function Recovery() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Recovery</h1>
 
-      <div className="flex gap-2 mb-6 border-b">
-        {buckets.map((b) => (
+      <div className="flex gap-2 mb-6 border-b overflow-x-auto">
+        {bucketConfig.map((b) => (
           <button
-            key={b}
-            onClick={() => setBucket(b)}
-            className={`px-4 py-2 font-medium text-sm ${
-              bucket === b
+            key={b.key}
+            onClick={() => setBucket(b.key)}
+            className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${
+              bucket === b.key
                 ? 'border-b-2 border-blue-600 text-blue-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            Bucket {b}
+            {b.label}
           </button>
         ))}
       </div>
