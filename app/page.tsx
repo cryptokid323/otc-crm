@@ -9,7 +9,7 @@ export default async function TodayQueue() {
 
   const { data: chapters, error } = await supabase
     .from('chapters')
-    .select('id, fraternity, school, ig_handle, stage, bucket, next_action, next_action_date, classification')
+    .select('id, fraternity, ig_handle, stage, bucket, next_action, next_action_date, classification')
     .eq('classification', 'active')
     .lte('next_action_date', today)
     .order('next_action_date', { ascending: true })
@@ -37,7 +37,6 @@ export default async function TodayQueue() {
             <thead>
               <tr className="border-b bg-gray-50">
                 <th className="text-left px-3 py-2 font-semibold">Fraternity</th>
-                <th className="text-left px-3 py-2 font-semibold">School</th>
                 <th className="text-left px-3 py-2 font-semibold">IG</th>
                 <th className="text-left px-3 py-2 font-semibold">Stage</th>
                 <th className="text-left px-3 py-2 font-semibold">Bucket</th>
@@ -54,7 +53,6 @@ export default async function TodayQueue() {
                       {ch.fraternity}
                     </Link>
                   </td>
-                  <td className="px-3 py-2 text-gray-700">{ch.school}</td>
                   <td className="px-3 py-2 text-gray-600">{ch.ig_handle}</td>
                   <td className="px-3 py-2 text-sm">{ch.stage}</td>
                   <td className="px-3 py-2 text-sm">{ch.bucket}</td>

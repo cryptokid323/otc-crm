@@ -10,7 +10,7 @@ export default function Recovery() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const buckets = ['1', '2', '3', '4', '5', '6']
+  const buckets = ['recent_one_touch', 'stalled_reply', 'phone_handoff', 'followup_pending', 'qualified_handoff', 'not_contacted']
 
   useEffect(() => {
     async function fetch() {
@@ -18,7 +18,7 @@ export default function Recovery() {
         const supabase = createClient()
         const { data, error: err } = await supabase
           .from('chapters')
-          .select('id, fraternity, school, stage, bucket, next_action, next_action_date')
+          .select('id, fraternity, stage, bucket, next_action, next_action_date')
           .eq('bucket', bucket)
           .order('next_action_date', { ascending: true })
 

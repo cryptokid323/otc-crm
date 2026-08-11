@@ -7,7 +7,7 @@ export default async function Pipeline() {
   // Get all chapters grouped by stage
   const { data: chapters, error } = await supabase
     .from('chapters')
-    .select('id, fraternity, school, stage, classification')
+    .select('id, fraternity, stage, classification')
     .order('stage, fraternity')
 
   if (error) {
@@ -56,7 +56,6 @@ export default async function Pipeline() {
                     className="block p-2 bg-white rounded hover:bg-blue-50 border text-sm"
                   >
                     <div className="font-medium">{ch.fraternity}</div>
-                    <div className="text-gray-600 text-xs">{ch.school}</div>
                     {ch.classification && (
                       <div className="text-gray-500 text-xs mt-1">
                         <span className={`inline-block px-2 py-0.5 rounded text-xs ${
