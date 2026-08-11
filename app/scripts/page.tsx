@@ -3,21 +3,50 @@ import { createClient } from '@/lib/supabase/server'
 export default async function Scripts() {
   const supabase = await createClient()
 
-  // Try to get script_funnel view data
-  const { data: funnel, error } = await supabase
-    .from('script_funnel')
-    .select('script_version, sent, replies, reply_rate')
-    .order('script_version')
+  // Get all chapters grouped by script_version
+  const { data: chapters } = await supabase
+    .from('chapters')
+    .select('id, script_version')
+
+  // Get all communications to count replies
+  const { data: communications } = await supabase
+    .from('communications')
+    .select('chapter_id, type')
+
+  // Build funnel data
+  const funnelMap: Record<string, { sent: number; replies: number }> = {}
+
+  chapters?.forEach((ch: any) => {
+    const version = ch.script_version || 'Unknown'
+    if (!funnelMap[version]) funnelMap[version] = { sent: 0, replies: 0 }
+    funnelMap[version].sent += 1
+  })
+
+  const chapterIds = new Set(chapters?.map((ch: any) => ch.id) || [])
+  communications?.forEach((comm: any) => {
+    const chapter = chapters?.find((ch: any) => ch.id === comm.chapter_id)
+    if (chapter) {
+      const version = chapter.script_version || 'Unknown'
+      if (funnelMap[version] && comm.type === 'reply') {
+        funnelMap[version].replies += 1
+      }
+    }
+  })
+
+  const funnel = Object.entries(funnelMap)
+    .map(([script_version, data]) => ({
+      script_version,
+      sent: data.sent,
+      replies: data.replies,
+      reply_rate: data.sent > 0 ? data.replies / data.sent : 0,
+    }))
+    .sort((a, b) => a.script_version.localeCompare(b.script_version))
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Scripts</h1>
 
-      {error ? (
-        <div className="text-red-600 mb-4">Error loading scripts: {error.message}</div>
-      ) : null}
-
-      {!funnel || funnel.length === 0 ? (
+      {funnel.length === 0 ? (
         <p className="text-gray-500">No script data available</p>
       ) : (
         <div className="overflow-x-auto">

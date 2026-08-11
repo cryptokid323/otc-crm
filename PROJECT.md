@@ -16,21 +16,25 @@ Full-stack CRM web application for managing fraternity chapter outreach, built w
 - **`/`** — TODAY QUEUE (home)
   - Lists chapters with overdue next actions (next_action_date ≤ today, classification = 'active')
   - Sorted by urgency (oldest first)
-  - Table columns: Fraternity, IG handle, Stage, Bucket, Next Action, Days Overdue, Action buttons
+  - Table columns: Fraternity, School, IG handle, Stage, Bucket, Next Action, Days Overdue, Action buttons
   - Server-rendered with real Supabase data
 
 - **`/pipeline`** — PIPELINE by Stage
+  - Shows all 16 stages in order (including empty stages)
   - Groups all chapters by stage
   - Shows chapter count per stage
+  - Shows 10 most recent chapter cards per stage; "view all" link for remaining
   - Filters: Active/Inactive classification checkboxes
   - Clickable chapter cards linking to detail pages
   - Server-rendered query
 
 - **`/recovery`** — RECOVERY by Bucket
   - Client component with bucket tabs (state-based tab switching)
-  - 6 bucket tabs: Recent 1-Touch, Stalled Reply, Phone Handoff, Followup Pending, Qualified Handoff, Not Contacted
+  - 6 bucket tabs: Recent 1-Touch, Stale 1-Touch, Stalled Reply, Phone Handoff, Missed Warm, Blocked
   - Each tab loads chapters for that bucket via client-side query
   - Shows next action and dates
+  - Card links to chapter detail
+  - Phone number shown inline for phone_handoff bucket
 
 - **`/scripts`** — SCRIPTS Performance
   - Script funnel view: sent, replies, reply_rate per script version
@@ -45,6 +49,8 @@ Full-stack CRM web application for managing fraternity chapter outreach, built w
   - Contacts section (fetched server-side, displays with phone/email/role)
   - Communications Timeline section (fetched server-side, sorted by date descending)
   - All edits via client-side mutation (ChapterEditor)
+  - Stage and Script Version are dropdown selects (not free text) to prevent constraint violations
+  - Bucket is dropdown select with real bucket values
 
 ## File Structure
 
@@ -65,7 +71,7 @@ Full-stack CRM web application for managing fraternity chapter outreach, built w
   layout.tsx                 # Root layout with Header
 
 /components
-  Header.tsx                 # Navigation + sign-out (server)
+  Header.tsx                 # Navigation + global search + sign-out (server)
 
 /lib/supabase
   server.ts                  # Server-side Supabase client (cookie-based sessions)
@@ -190,23 +196,44 @@ const { data, error } = await supabase.from('chapters').update(...).eq('id', cha
 
 ### Enum/Check Constraint Values
 
-**stage** (16 values)
-- `dm_sent`
-- `responded`
-- `phone`
-- (13 others — full list to be confirmed from database)
+**stage** (16 values, in order)
+- `dm_sent` — Initial Instagram DM sent
+- `responded` — Prospect responded to DM
+- `phone` — Phone call made or scheduled
+- `meeting` — In-person or video meeting held
+- `proposal` — Proposal or quote sent
+- `negotiation` — Actively negotiating terms
+- `contract_pending` — Contract sent, awaiting signature
+- `contract_signed` — Contract signed by prospect
+- `deposit_pending` — Awaiting deposit payment
+- `deposit_received` — Deposit received, event booked
+- `event_scheduled` — Event date finalized
+- `stalled` — Conversation stalled, needs follow-up
+- `lost` — Deal lost (generic)
+- `competitor` — Lost to competitor service
+- `dnc` — Do not contact (legal/compliance issue)
+- `archived` — Old or inactive entry
 
-**classification** (multiple values)
-- `active`
-- (others TBD)
+**classification** (11 values)
+- `active` — Current active opportunity
+- `future` — Future prospect to revisit
+- `competitor` — Currently using competitor
+- `planned` — Already have event planned
+- `not_interested` — Declined interest
+- `too_small` — Insufficient budget or size
+- `blocked` — Cannot contact or legal hold
+- `dnc` — Do not contact flag
+- `bad_account` — Invalid or fraudulent account
+- `wrong_chapter` — Incorrect chapter identification
+- `duplicate` — Duplicate record
 
-**bucket** (6 values)
-- `recent_one_touch`
-- `stalled_reply`
-- `phone_handoff`
-- `followup_pending`
-- `qualified_handoff`
-- `not_contacted`
+**bucket** (6 values, for recovery workflows)
+- `recent_one_touch` — Recently had single touch point
+- `stale_one_touch` — Old single touch point
+- `stalled_reply` — Reply conversation stalled
+- `phone_handoff` — Ready for phone call handoff
+- `missed_warm` — Warm opportunity that was missed
+- `blocked` — Cannot contact due to block/legal
 
 ## Row-Level Security (RLS)
 
@@ -233,11 +260,10 @@ npm run dev
 
 ## Next Steps
 
-- Create `script_funnel` view in Supabase SQL Editor
 - Implement "Done" button and "Set Next" modal on TODAY QUEUE
 - Add contact/communication creation UI
 - Implement rep filter on Pipeline and Recovery pages
-- Add search/filter on chapter names and stages
+- Add filtering by bucket on Pipeline page
 
 ## Deployment
 

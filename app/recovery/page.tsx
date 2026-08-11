@@ -12,11 +12,11 @@ export default function Recovery() {
 
   const bucketConfig = [
     { key: 'recent_one_touch', label: 'Recent 1-Touch' },
+    { key: 'stale_one_touch', label: 'Stale 1-Touch' },
     { key: 'stalled_reply', label: 'Stalled Reply' },
     { key: 'phone_handoff', label: 'Phone Handoff' },
-    { key: 'followup_pending', label: 'Followup Pending' },
-    { key: 'qualified_handoff', label: 'Qualified Handoff' },
-    { key: 'not_contacted', label: 'Not Contacted' },
+    { key: 'missed_warm', label: 'Missed Warm' },
+    { key: 'blocked', label: 'Blocked' },
   ]
 
   useEffect(() => {
@@ -25,12 +25,30 @@ export default function Recovery() {
         const supabase = createClient()
         const { data, error: err } = await supabase
           .from('chapters')
-          .select('id, fraternity, stage, bucket, next_action, next_action_date')
+          .select('id, fraternity, school_id, stage, bucket, next_action, next_action_date')
           .eq('bucket', bucket)
           .order('next_action_date', { ascending: true })
 
         if (err) throw err
-        setChapters(data || [])
+
+        // For phone_handoff, fetch contact phone numbers
+        if (bucket === 'phone_handoff' && data) {
+          const chaptersWithPhones = await Promise.all(
+            data.map(async (ch: any) => {
+              const { data: contact } = await supabase
+                .from('contacts')
+                .select('phone')
+                .eq('chapter_id', ch.id)
+                .limit(1)
+                .single()
+
+              return { ...ch, phone: contact?.phone }
+            })
+          )
+          setChapters(chaptersWithPhones)
+        } else {
+          setChapters(data || [])
+        }
         setError(null)
       } catch (e: any) {
         setError(e.message)
@@ -81,8 +99,11 @@ export default function Recovery() {
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-bold">{ch.fraternity}</h3>
-                  <p className="text-sm text-gray-600">{ch.school}</p>
+                  <p className="text-sm text-gray-600">{ch.school_id}</p>
                   <p className="text-sm text-gray-700 mt-1">{ch.next_action}</p>
+                  {bucket === 'phone_handoff' && ch.phone && (
+                    <p className="text-sm text-blue-600 font-mono mt-1">{ch.phone}</p>
+                  )}
                 </div>
                 <div className="text-right text-sm">
                   <p className="font-medium">{ch.stage}</p>

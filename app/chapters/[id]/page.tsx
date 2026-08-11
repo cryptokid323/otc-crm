@@ -112,7 +112,7 @@ export default async function ChapterDetail({
               </div>
               <div>
                 <span className="text-gray-600">IG Handle</span>
-                <p className="font-medium">@{chapter.ig_handle}</p>
+                <p className="font-medium">{chapter.ig_handle}</p>
               </div>
               <div>
                 <span className="text-gray-600">Script Version</span>

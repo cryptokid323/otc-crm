@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { BUCKETS, BUCKET_LABELS, STAGES, STAGE_LABELS, SCRIPT_VERSIONS, CLASSIFICATIONS, CLASSIFICATION_LABELS } from '@/lib/constants'
 
 export default function ChapterEditor({ chapter }: { chapter: any }) {
   const [saving, setSaving] = useState(false)
@@ -53,12 +54,18 @@ export default function ChapterEditor({ chapter }: { chapter: any }) {
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-sm font-medium mb-1">Stage</label>
-          <input
-            type="text"
+          <select
             value={formData.stage}
             onChange={(e) => handleChange('stage', e.target.value)}
             className="w-full border rounded px-3 py-2 text-sm"
-          />
+          >
+            <option value="">Select a stage</option>
+            {STAGES.map((s) => (
+              <option key={s} value={s}>
+                {STAGE_LABELS[s as keyof typeof STAGE_LABELS]}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -68,8 +75,12 @@ export default function ChapterEditor({ chapter }: { chapter: any }) {
             onChange={(e) => handleChange('classification', e.target.value)}
             className="w-full border rounded px-3 py-2 text-sm"
           >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="">Select a classification</option>
+            {CLASSIFICATIONS.map((c) => (
+              <option key={c} value={c}>
+                {CLASSIFICATION_LABELS[c as keyof typeof CLASSIFICATION_LABELS]}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -80,9 +91,10 @@ export default function ChapterEditor({ chapter }: { chapter: any }) {
             onChange={(e) => handleChange('bucket', e.target.value)}
             className="w-full border rounded px-3 py-2 text-sm"
           >
-            {['1', '2', '3', '4', '5', '6'].map((b) => (
+            <option value="">Select a bucket</option>
+            {BUCKETS.map((b) => (
               <option key={b} value={b}>
-                Bucket {b}
+                {BUCKET_LABELS[b as keyof typeof BUCKET_LABELS]}
               </option>
             ))}
           </select>
@@ -90,13 +102,18 @@ export default function ChapterEditor({ chapter }: { chapter: any }) {
 
         <div>
           <label className="block text-sm font-medium mb-1">Script Version</label>
-          <input
-            type="text"
+          <select
             value={formData.script_version}
             onChange={(e) => handleChange('script_version', e.target.value)}
-            placeholder="e.g., v1.2"
             className="w-full border rounded px-3 py-2 text-sm"
-          />
+          >
+            <option value="">Select a version</option>
+            {SCRIPT_VERSIONS.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

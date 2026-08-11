@@ -75,15 +75,14 @@ Sales representatives.
 
 ## Enum/Check Constraint Values
 
-### stage
-16 distinct values (to be confirmed from database inspection)
+### stage (16 values)
+- dm_sent, responded, phone, meeting, proposal, negotiation, contract_pending, contract_signed, deposit_pending, deposit_received, event_scheduled, stalled, lost, competitor, dnc, archived
 
-### classification
-- active
-- (others TBD)
+### classification (11 values)
+- active, future, competitor, planned, not_interested, too_small, blocked, dnc, bad_account, wrong_chapter, duplicate
 
-### bucket
-- 6 distinct values for recovery grouping
+### bucket (6 values)
+- recent_one_touch, stale_one_touch, stalled_reply, phone_handoff, missed_warm, blocked
 
 ## Notes
 - Database currently empty; schema inferred from requirements
