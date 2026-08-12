@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ChapterEditor from './ChapterEditor'
+import TimelineAndForm from './TimelineAndForm'
 
 export default async function ChapterDetail({
   params,
@@ -10,10 +11,10 @@ export default async function ChapterDetail({
   const { id } = await params
   const supabase = await createClient()
 
-  // Fetch chapter details
+  // Fetch chapter details with school and rep
   const { data: chapter, error: chError } = await supabase
     .from('chapters')
-    .select('*')
+    .select('*, schools(id, name, tier, region, verify_before_dm), reps:assigned_rep_id(id, name, email)')
     .eq('id', id)
     .single()
 
@@ -35,10 +36,33 @@ export default async function ChapterDetail({
     .eq('chapter_id', id)
     .order('created_at', { ascending: false })
 
+  const school = chapter.schools
+  const rep = Array.isArray(chapter.reps) ? chapter.reps[0] : chapter.reps
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
+      {/* Header with school and verify warning */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">{chapter.fraternity}</h1>
+        <h1 className="text-3xl font-bold mb-2">{chapter.fraternity}</h1>
+        {school && (
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            <span>{school.name}</span>
+            {school.tier && <span className="px-2 py-1 bg-gray-100 rounded text-xs font-medium">{school.tier}</span>}
+            {school.region && <span>{school.region}</span>}
+            {school.verify_before_dm === 'Yes' && (
+              <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs font-semibold">⚠ Verify before DM</span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Timeline and Log Form - moved above fold */}
+      <div className="mb-6">
+        <TimelineAndForm
+          chapterId={id}
+          communications={communications || []}
+          lastContact={chapter.last_contact}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -66,35 +90,19 @@ export default async function ChapterDetail({
               </div>
             )}
           </div>
-
-          {/* Communications Timeline */}
-          <div className="border rounded-lg p-4">
-            <h2 className="text-xl font-bold mb-4">Communications Timeline</h2>
-            {!communications || communications.length === 0 ? (
-              <p className="text-gray-500 text-sm">No communications logged</p>
-            ) : (
-              <div className="space-y-3">
-                {communications.map((comm: any) => (
-                  <div key={comm.id} className="border-l-2 border-gray-300 pl-4 py-2">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="font-semibold capitalize">{comm.type}</div>
-                        {comm.subject && <div className="text-sm font-medium">{comm.subject}</div>}
-                        {comm.notes && <div className="text-sm text-gray-700 mt-1">{comm.notes}</div>}
-                      </div>
-                      <div className="text-xs text-gray-600 text-right">
-                        {new Date(comm.created_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Sidebar - Quick Info */}
         <div className="space-y-4">
+          {/* Assigned Rep */}
+          <div className="border rounded-lg p-4">
+            <h3 className="font-bold text-sm mb-3 uppercase">Assigned Rep</h3>
+            <div className="text-sm">
+              <p className="font-medium">{rep?.name || 'Unassigned'}</p>
+              {rep?.email && <p className="text-gray-600 text-xs">{rep.email}</p>}
+            </div>
+          </div>
+
           <div className="border rounded-lg p-4">
             <h3 className="font-bold text-sm mb-3 uppercase">Details</h3>
             <div className="space-y-2 text-sm">
