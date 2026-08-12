@@ -12,9 +12,10 @@ export default async function ChapterDetail({
   const supabase = await createClient()
 
   // Fetch chapter details with school and rep
+  // Note: email column not yet in reps table - will be added in migration 002
   const { data: chapter, error: chError } = await supabase
     .from('chapters')
-    .select('*, schools(id, name, tier, region, verify_before_dm), reps:assigned_rep_id(id, name, email)')
+    .select('*, schools(id, name, tier, region, verify_before_dm), reps:assigned_rep_id(id, name)')
     .eq('id', id)
     .single()
 
