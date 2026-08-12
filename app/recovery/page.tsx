@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { NEXT_ACTION_TYPE_LABELS, NEXT_ACTION_TYPE_COLORS } from '@/lib/constants'
 
 export default function Recovery() {
   const [bucket, setBucket] = useState<string>('recent_one_touch')
@@ -25,7 +26,7 @@ export default function Recovery() {
         const supabase = createClient()
         const { data, error: err } = await supabase
           .from('chapters')
-          .select('id, fraternity, schools(name), stage, bucket, next_action, next_action_date')
+          .select('id, fraternity, schools(name), stage, bucket, next_action, next_action_type, next_action_date')
           .eq('bucket', bucket)
           .order('next_action_date', { ascending: true })
 
@@ -100,6 +101,13 @@ export default function Recovery() {
                 <div>
                   <h3 className="font-bold">{ch.fraternity}</h3>
                   <p className="text-sm text-gray-600">{ch.schools?.name}</p>
+                  {ch.next_action_type && (
+                    <p className="text-sm mt-1">
+                      <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${NEXT_ACTION_TYPE_COLORS[ch.next_action_type] || 'bg-gray-100 text-gray-800'}`}>
+                        {NEXT_ACTION_TYPE_LABELS[ch.next_action_type] || ch.next_action_type}
+                      </span>
+                    </p>
+                  )}
                   <p className="text-sm text-gray-700 mt-1">{ch.next_action}</p>
                   {bucket === 'phone_handoff' && ch.phone && (
                     <p className="text-sm text-blue-600 font-mono mt-1">{ch.phone}</p>

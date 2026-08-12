@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { BUCKETS, BUCKET_LABELS, STAGES, STAGE_LABELS, SCRIPT_VERSIONS, CLASSIFICATIONS, CLASSIFICATION_LABELS } from '@/lib/constants'
+import { BUCKETS, BUCKET_LABELS, STAGES, STAGE_LABELS, SCRIPT_VERSIONS, CLASSIFICATIONS, CLASSIFICATION_LABELS, NEXT_ACTION_TYPES, NEXT_ACTION_TYPE_LABELS } from '@/lib/constants'
 
 export default function ChapterEditor({ chapter }: { chapter: any }) {
   const [saving, setSaving] = useState(false)
@@ -12,6 +12,7 @@ export default function ChapterEditor({ chapter }: { chapter: any }) {
     classification: chapter.classification || '',
     bucket: chapter.bucket || '',
     script_version: chapter.script_version || '',
+    next_action_type: chapter.next_action_type || '',
     next_action: chapter.next_action || '',
     next_action_date: chapter.next_action_date || '',
     notes: chapter.notes || '',
@@ -117,23 +118,41 @@ export default function ChapterEditor({ chapter }: { chapter: any }) {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Next Action Type</label>
+          <select
+            value={formData.next_action_type}
+            onChange={(e) => handleChange('next_action_type', e.target.value)}
+            className="w-full border rounded px-3 py-2 text-sm"
+          >
+            <option value="">Select a type</option>
+            {NEXT_ACTION_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {NEXT_ACTION_TYPE_LABELS[t as keyof typeof NEXT_ACTION_TYPE_LABELS]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Next Action Date</label>
+          <input
+            type="date"
+            value={formData.next_action_date}
+            onChange={(e) => handleChange('next_action_date', e.target.value)}
+            className="w-full border rounded px-3 py-2 text-sm"
+          />
+        </div>
+      </div>
+
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Next Action</label>
+        <label className="block text-sm font-medium mb-1">Next Action Details</label>
         <input
           type="text"
           value={formData.next_action}
           onChange={(e) => handleChange('next_action', e.target.value)}
-          placeholder="e.g., Follow up call"
-          className="w-full border rounded px-3 py-2 text-sm"
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Next Action Date</label>
-        <input
-          type="date"
-          value={formData.next_action_date}
-          onChange={(e) => handleChange('next_action_date', e.target.value)}
+          placeholder="e.g., Follow up call, send quote"
           className="w-full border rounded px-3 py-2 text-sm"
         />
       </div>

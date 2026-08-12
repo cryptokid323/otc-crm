@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { PHASES, PHASE_STAGES, STAGE_LABELS } from '@/lib/constants'
+import { PHASES, PHASE_STAGES, STAGE_LABELS, NEXT_ACTION_TYPE_LABELS, NEXT_ACTION_TYPE_COLORS } from '@/lib/constants'
 
 export default async function Pipeline() {
   const supabase = await createClient()
@@ -8,7 +8,7 @@ export default async function Pipeline() {
   // Get all chapters grouped by stage
   const { data: chapters, error } = await supabase
     .from('chapters')
-    .select('id, fraternity, stage, classification')
+    .select('id, fraternity, stage, classification, next_action_type')
     .order('stage, fraternity')
 
   if (error) {
@@ -62,6 +62,15 @@ export default async function Pipeline() {
                       <div className="text-gray-500 text-xs mt-1">
                         {STAGE_LABELS[ch.stage] || ch.stage}
                       </div>
+                      {ch.next_action_type && (
+                        <div className="mt-1">
+                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                            NEXT_ACTION_TYPE_COLORS[ch.next_action_type] || 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {NEXT_ACTION_TYPE_LABELS[ch.next_action_type] || ch.next_action_type}
+                          </span>
+                        </div>
+                      )}
                       {ch.classification && (
                         <div className="text-gray-500 text-xs mt-1">
                           <span className={`inline-block px-2 py-0.5 rounded text-xs ${

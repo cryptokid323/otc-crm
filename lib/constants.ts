@@ -110,3 +110,42 @@ export const PHASE_STAGES: Record<string, string[]> = {
   'In Conversation': ['phone', 'call_sched', 'call_done', 'qualified'],
   'Deal': ['quote', 'proposal', 'decision', 'contract', 'booked'],
 };
+
+export const NEXT_ACTION_TYPES = [
+  'send_dm',
+  'follow_up_1',
+  'follow_up_2',
+  'reply_thread',
+  'text_handoff',
+  'call',
+  'send_quote',
+  'schedule_call',
+  'find_alt_channel',
+  're_engage_later',
+] as const;
+
+export const NEXT_ACTION_TYPE_LABELS: Record<string, string> = {
+  'send_dm': 'Send DM',
+  'follow_up_1': 'Follow-Up #1',
+  'follow_up_2': 'Follow-Up #2',
+  'reply_thread': 'Reply & Route',
+  'text_handoff': 'Text Handoff',
+  'call': 'Call',
+  'send_quote': 'Send Quote',
+  'schedule_call': 'Schedule Call',
+  'find_alt_channel': 'Find Alt Channel',
+  're_engage_later': 'Re-engage Later',
+};
+
+export const NEXT_ACTION_TYPE_COLORS: Record<string, string> = {
+  'send_dm': 'bg-blue-100 text-blue-800',
+  'follow_up_1': 'bg-purple-100 text-purple-800',
+  'follow_up_2': 'bg-purple-100 text-purple-800',
+  'reply_thread': 'bg-green-100 text-green-800',
+  'text_handoff': 'bg-yellow-100 text-yellow-800',
+  'call': 'bg-red-100 text-red-800',
+  'send_quote': 'bg-indigo-100 text-indigo-800',
+  'schedule_call': 'bg-orange-100 text-orange-800',
+  'find_alt_channel': 'bg-pink-100 text-pink-800',
+  're_engage_later': 'bg-gray-100 text-gray-800',
+};

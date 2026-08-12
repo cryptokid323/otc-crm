@@ -21,6 +21,7 @@ export default async function Header() {
                 <Link href="/" className="hover:text-blue-600">Today Queue</Link>
                 <Link href="/pipeline" className="hover:text-blue-600">Pipeline</Link>
                 <Link href="/recovery" className="hover:text-blue-600">Recovery</Link>
+                <Link href="/schools" className="hover:text-blue-600">Schools</Link>
                 <Link href="/scripts" className="hover:text-blue-600">Scripts</Link>
               </nav>
               <form action={signOut} className="flex items-center gap-3 pl-4 border-l">
