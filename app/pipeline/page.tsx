@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { STAGES } from '@/lib/constants'
+import { PHASES, PHASE_STAGES, STAGE_LABELS } from '@/lib/constants'
 
 export default async function Pipeline() {
   const supabase = await createClient()
@@ -15,19 +15,13 @@ export default async function Pipeline() {
     return <div className="p-6 text-red-600">Error loading pipeline: {error.message}</div>
   }
 
-  // Group by stage (including empty stages)
+  // Group by stage first
   const grouped: Record<string, any[]> = {}
-
-  STAGES.forEach((stage) => {
-    grouped[stage] = []
-  })
 
   chapters?.forEach((ch: any) => {
     if (!grouped[ch.stage]) grouped[ch.stage] = []
     grouped[ch.stage].push(ch)
   })
-
-  const stages = STAGES
 
   return (
     <div className="p-6">
@@ -44,17 +38,18 @@ export default async function Pipeline() {
         </label>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {stages.map((stage) => {
-            const stageChapters = grouped[stage]
-            const showing = stageChapters.slice(0, 10)
-            const remaining = stageChapters.length - showing.length
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        {PHASES.map((phase) => {
+            const stagesInPhase = PHASE_STAGES[phase] || []
+            const phaseChapters = stagesInPhase.flatMap(stage => grouped[stage] || [])
+            const showing = phaseChapters.slice(0, 5)
+            const remaining = phaseChapters.length - showing.length
 
             return (
-              <div key={stage} className="border rounded-lg p-4 bg-gray-50">
-                <h2 className="font-bold text-lg mb-2">{stage}</h2>
+              <div key={phase} className="border rounded-lg p-4 bg-gray-50">
+                <h2 className="font-bold text-base mb-2">{phase}</h2>
                 <p className="text-sm text-gray-600 mb-3">
-                  {stageChapters.length} chapter{stageChapters.length !== 1 ? 's' : ''}
+                  {phaseChapters.length} chapter{phaseChapters.length !== 1 ? 's' : ''}
                 </p>
                 <div className="space-y-2">
                   {showing.map((ch: any) => (
@@ -64,6 +59,9 @@ export default async function Pipeline() {
                       className="block p-2 bg-white rounded hover:bg-blue-50 border text-sm"
                     >
                       <div className="font-medium">{ch.fraternity}</div>
+                      <div className="text-gray-500 text-xs mt-1">
+                        {STAGE_LABELS[ch.stage] || ch.stage}
+                      </div>
                       {ch.classification && (
                         <div className="text-gray-500 text-xs mt-1">
                           <span className={`inline-block px-2 py-0.5 rounded text-xs ${
@@ -77,7 +75,7 @@ export default async function Pipeline() {
                   ))}
                   {remaining > 0 && (
                     <Link
-                      href={`/pipeline?stage=${encodeURIComponent(stage)}`}
+                      href={`/pipeline?phase=${encodeURIComponent(phase)}`}
                       className="block p-2 text-center text-blue-600 hover:bg-blue-50 border rounded text-sm font-medium"
                     >
                       View all {remaining} chapters

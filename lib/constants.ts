@@ -94,3 +94,19 @@ export const SCRIPT_VERSIONS = [
   'v2.1',
   'v3.0',
 ] as const;
+
+export const PHASES = [
+  'Not Started',
+  'Outreach',
+  'Engaged',
+  'In Conversation',
+  'Deal',
+] as const;
+
+export const PHASE_STAGES: Record<string, string[]> = {
+  'Not Started': ['prospect', 'assigned'],
+  'Outreach': ['dm_sent', 'fu1', 'fu2'],
+  'Engaged': ['responded', 'dm_found'],
+  'In Conversation': ['phone', 'call_sched', 'call_done', 'qualified'],
+  'Deal': ['quote', 'proposal', 'decision', 'contract', 'booked'],
+};
