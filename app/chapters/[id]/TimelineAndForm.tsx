@@ -78,6 +78,25 @@ export default function TimelineAndForm({
     }
   }
 
+  const handleDeleteMessage = async (commId: string) => {
+    if (!confirm('Delete this message?')) return
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('communications')
+        .delete()
+        .eq('id', commId)
+
+      if (error) throw error
+
+      // Remove from local state
+      setCommunications(communications.filter(c => c.id !== commId))
+    } catch (e: any) {
+      setError(e.message)
+    }
+  }
+
   return (
     <div className="border rounded-lg p-4">
       <h2 className="text-xl font-bold mb-4">Communication Timeline</h2>
@@ -114,9 +133,15 @@ export default function TimelineAndForm({
                     <span className="text-xs text-gray-500 font-mono uppercase">
                       {comm.channel}
                     </span>
-                    <span className="text-xs text-gray-600 ml-auto">
+                    <span className="text-xs text-gray-600">
                       {new Date(comm.sent_on).toLocaleDateString()}
                     </span>
+                    <button
+                      onClick={() => handleDeleteMessage(comm.id)}
+                      className="ml-auto text-xs text-red-600 hover:text-red-800 hover:underline"
+                    >
+                      Delete
+                    </button>
                   </div>
                   <p className="text-sm text-gray-700 break-words">{comm.body}</p>
                 </div>

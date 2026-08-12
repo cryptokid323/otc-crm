@@ -88,12 +88,16 @@ export const BUCKET_LABELS: Record<string, string> = {
 };
 
 export const SCRIPT_VERSIONS = [
-  'v1.0',
-  'v1.1',
-  'v2.0',
-  'v2.1',
-  'v3.0',
+  'A',
+  'B',
+  'R',
 ] as const;
+
+export const SCRIPT_VERSION_LABELS: Record<string, string> = {
+  'A': 'Script A — President meeting (legacy)',
+  'B': 'Script B — Decision-maker routing',
+  'R': 'Script R — Phone reactivation',
+};
 
 export const PHASES = [
   'Not Started',

@@ -225,40 +225,40 @@ export default function TodayQueueClient({
       )}
 
       {/* OVERDUE Section */}
-      {overdue.length > 0 && (
-        <div className="mb-6 border rounded-lg overflow-hidden">
-          <div className="bg-red-50 border-b px-3 py-2 font-semibold text-sm text-red-700">
-            OVERDUE ({overdue.length})
-          </div>
-          {overdue.map((ch) => (
-            <ChapterRow key={ch.id} chapter={ch} />
-          ))}
+      <div className="mb-6 border rounded-lg overflow-hidden">
+        <div className="bg-red-50 border-b px-3 py-2 font-semibold text-sm text-red-700">
+          OVERDUE ({overdue.length})
         </div>
-      )}
+        {overdue.length > 0 ? (
+          overdue.map((ch) => <ChapterRow key={ch.id} chapter={ch} />)
+        ) : (
+          <div className="px-3 py-3 text-sm text-gray-500">No overdue chapters</div>
+        )}
+      </div>
 
       {/* DUE TODAY Section */}
-      {dueToday.length > 0 && (
-        <div className="mb-6 border rounded-lg overflow-hidden">
-          <div className="bg-amber-50 border-b px-3 py-2 font-semibold text-sm text-amber-700">
-            DUE TODAY ({dueToday.length})
-          </div>
-          {dueToday.map((ch) => (
-            <ChapterRow key={ch.id} chapter={ch} />
-          ))}
+      <div className="mb-6 border rounded-lg overflow-hidden">
+        <div className="bg-amber-50 border-b px-3 py-2 font-semibold text-sm text-amber-700">
+          DUE TODAY ({dueToday.length})
         </div>
-      )}
+        {dueToday.length > 0 ? (
+          dueToday.map((ch) => <ChapterRow key={ch.id} chapter={ch} />)
+        ) : (
+          <div className="px-3 py-3 text-sm text-gray-500">No chapters due today</div>
+        )}
+      </div>
 
       {/* THIS WEEK Section */}
-      {thisWeek.length > 0 && (
-        <div className="mb-6 border rounded-lg overflow-hidden">
-          <div className="bg-gray-50 border-b px-3 py-2 font-semibold text-sm text-gray-700">
-            THIS WEEK ({thisWeek.length})
-          </div>
-          {thisWeek.map((ch) => (
-            <ChapterRow key={ch.id} chapter={ch} />
-          ))}
+      <div className="mb-6 border rounded-lg overflow-hidden">
+        <div className="bg-gray-50 border-b px-3 py-2 font-semibold text-sm text-gray-700">
+          THIS WEEK ({thisWeek.length})
         </div>
-      )}
+        {thisWeek.length > 0 ? (
+          thisWeek.map((ch) => <ChapterRow key={ch.id} chapter={ch} />)
+        ) : (
+          <div className="px-3 py-3 text-sm text-gray-500">No chapters due this week</div>
+        )}
+      </div>
     </div>
   )
 }
