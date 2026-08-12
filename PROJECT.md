@@ -292,13 +292,40 @@ npm run dev
 
 ## Recent Changes (Aug 2026)
 
-### Visual/Workflow Batch Implementation
-- **Rep Assignment** — Show rep on every chapter row, bulk assign via multi-select checkboxes
-- **Today Queue Restructure** — Group by urgency (OVERDUE/DUE TODAY/THIS WEEK), two-line dense row format
-- **Inline Conversation Context** — Display latest communication on each row (direction, channel, body preview)
-- **Chapter Detail Timeline** — Communications moved above fold with visual distinction (inbound/outbound)
-- **Message Logging** — Form to log new communications and auto-update last_contact date
-- **Database** — Reps now have email column (migration 002), schools have verify_before_dm flag
+### Visual/Workflow Batch Implementation ✓ COMPLETE
+**Part 1 — Rep Assignment**
+- Show assigned rep on every chapter row and chapter detail sidebar
+- Multi-select checkboxes on Today Queue with bulk "Assign to rep" action
+- Email mapping: michaelvita@otctrips.com → Michael, tylerdaley@otctrips.com → Tyler, davisdeal@otctrips.com → Davis
+- My Queue / All toggle filters by logged-in user's assigned chapters
+
+**Part 2 — Today Queue Restructure**
+- Group rows into sections: OVERDUE (red) | DUE TODAY (amber) | THIS WEEK (gray)
+- Two-line dense row format: Line 1 = Fraternity + School + Tier badge (if tier exists)
+- Line 2 = Action type chip + Next action detail + Last contact date
+- Currently 242 OVERDUE, 0 DUE TODAY, 0 THIS WEEK (correct per data)
+
+**Part 3 — Inline Conversation Context**
+- Latest communication shows on every row: direction (←/→) + channel + body preview (~90 chars, muted)
+- Single efficient query per page — no N+1 queries
+- Renders on Today Queue and Recovery pages
+
+**Part 4 — Chapter Detail Timeline**
+- Communications timeline prominent above fold, newest first
+- Inbound (blue dot) / Outbound (green dot) visual distinction
+- School tier, region, and "Verify before DM" warning badge in header
+- Assigned rep displays in sidebar with email address
+
+**Part 5 — Log a Message**
+- Form on chapter detail: channel (instagram/email/text/call/other), direction (in/out), date, body
+- Auto-updates chapter.last_contact on save
+- Timeline updates immediately with new message
+- Delete button on each message with confirmation
+
+**Database Updates**
+- Added email column to reps table (migration 002)
+- Added verify_before_dm column to schools table (migration 002)
+- 611 total chapters, 3 reps, 211 schools
 
 ## Next Steps
 
