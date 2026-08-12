@@ -120,25 +120,27 @@ export default function TimelineAndForm({
                   <div className="w-0.5 h-12 bg-gray-200 mt-1" />
                 </div>
                 <div className="pb-4 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span
-                      className={`text-xs font-semibold px-2 py-1 rounded ${
-                        comm.direction === 'in'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}
-                    >
-                      {comm.direction === 'in' ? '← Inbound' : '→ Outbound'}
-                    </span>
-                    <span className="text-xs text-gray-500 font-mono uppercase">
-                      {comm.channel}
-                    </span>
-                    <span className="text-xs text-gray-600">
-                      {new Date(comm.sent_on).toLocaleDateString()}
-                    </span>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span
+                        className={`text-xs font-semibold px-2 py-1 rounded ${
+                          comm.direction === 'in'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-green-100 text-green-800'
+                        }`}
+                      >
+                        {comm.direction === 'in' ? '← Inbound' : '→ Outbound'}
+                      </span>
+                      <span className="text-xs text-gray-500 font-mono uppercase">
+                        {comm.channel}
+                      </span>
+                      <span className="text-xs text-gray-600">
+                        {new Date(comm.sent_on).toLocaleDateString()}
+                      </span>
+                    </div>
                     <button
                       onClick={() => handleDeleteMessage(comm.id)}
-                      className="ml-auto text-xs text-red-600 hover:text-red-800 hover:underline"
+                      className="text-xs text-red-600 hover:text-red-800 hover:underline font-medium flex-shrink-0"
                     >
                       Delete
                     </button>
