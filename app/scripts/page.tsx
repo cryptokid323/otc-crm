@@ -11,7 +11,7 @@ export default async function Scripts() {
   // Get all communications to count replies
   const { data: communications } = await supabase
     .from('communications')
-    .select('chapter_id, type')
+    .select('chapter_id, type, direction')
 
   // Build funnel data
   const funnelMap: Record<string, { sent: number; replies: number }> = {}
@@ -22,12 +22,12 @@ export default async function Scripts() {
     funnelMap[version].sent += 1
   })
 
-  const chapterIds = new Set(chapters?.map((ch: any) => ch.id) || [])
   communications?.forEach((comm: any) => {
     const chapter = chapters?.find((ch: any) => ch.id === comm.chapter_id)
     if (chapter) {
       const version = chapter.script_version || 'Unknown'
-      if (funnelMap[version] && comm.type === 'reply') {
+      // Count communications where direction='in' (incoming/reply)
+      if (funnelMap[version] && comm.direction === 'in') {
         funnelMap[version].replies += 1
       }
     }

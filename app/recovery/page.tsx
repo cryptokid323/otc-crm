@@ -25,7 +25,7 @@ export default function Recovery() {
         const supabase = createClient()
         const { data, error: err } = await supabase
           .from('chapters')
-          .select('id, fraternity, school_id, stage, bucket, next_action, next_action_date')
+          .select('id, fraternity, schools(name), stage, bucket, next_action, next_action_date')
           .eq('bucket', bucket)
           .order('next_action_date', { ascending: true })
 
@@ -99,7 +99,7 @@ export default function Recovery() {
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="font-bold">{ch.fraternity}</h3>
-                  <p className="text-sm text-gray-600">{ch.school_id}</p>
+                  <p className="text-sm text-gray-600">{ch.schools?.name}</p>
                   <p className="text-sm text-gray-700 mt-1">{ch.next_action}</p>
                   {bucket === 'phone_handoff' && ch.phone && (
                     <p className="text-sm text-blue-600 font-mono mt-1">{ch.phone}</p>
