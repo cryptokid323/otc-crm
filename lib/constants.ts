@@ -4,41 +4,41 @@
  */
 
 export const STAGES = [
+  'prospect',
+  'assigned',
   'dm_sent',
+  'fu1',
+  'fu2',
   'responded',
+  'dm_found',
   'phone',
-  'meeting',
+  'call_sched',
+  'call_done',
+  'qualified',
+  'quote',
   'proposal',
-  'negotiation',
-  'contract_pending',
-  'contract_signed',
-  'deposit_pending',
-  'deposit_received',
-  'event_scheduled',
-  'stalled',
-  'lost',
-  'competitor',
-  'dnc',
-  'archived',
+  'decision',
+  'contract',
+  'booked',
 ] as const;
 
 export const STAGE_LABELS: Record<string, string> = {
+  'prospect': 'Prospect',
+  'assigned': 'Assigned',
   'dm_sent': 'DM Sent',
+  'fu1': 'Follow-up 1',
+  'fu2': 'Follow-up 2',
   'responded': 'Responded',
+  'dm_found': 'DM Found',
   'phone': 'Phone',
-  'meeting': 'Meeting',
+  'call_sched': 'Call Scheduled',
+  'call_done': 'Call Done',
+  'qualified': 'Qualified',
+  'quote': 'Quote',
   'proposal': 'Proposal',
-  'negotiation': 'Negotiating',
-  'contract_pending': 'Contract Pending',
-  'contract_signed': 'Contract Signed',
-  'deposit_pending': 'Deposit Pending',
-  'deposit_received': 'Deposit Received',
-  'event_scheduled': 'Event Scheduled',
-  'stalled': 'Stalled',
-  'lost': 'Lost',
-  'competitor': 'Competitor Won',
-  'dnc': 'Do Not Contact',
-  'archived': 'Archived',
+  'decision': 'Decision',
+  'contract': 'Contract',
+  'booked': 'Booked',
 };
 
 export const CLASSIFICATIONS = [
@@ -70,20 +70,20 @@ export const CLASSIFICATION_LABELS: Record<string, string> = {
 };
 
 export const BUCKETS = [
-  'recent_one_touch',
-  'stale_one_touch',
-  'stalled_reply',
   'phone_handoff',
   'missed_warm',
+  'stalled_reply',
+  'stale_one_touch',
+  'recent_one_touch',
   'blocked',
 ] as const;
 
 export const BUCKET_LABELS: Record<string, string> = {
-  'recent_one_touch': 'Recent 1-Touch',
-  'stale_one_touch': 'Stale 1-Touch',
-  'stalled_reply': 'Stalled Reply',
   'phone_handoff': 'Phone Handoff',
   'missed_warm': 'Missed Warm',
+  'stalled_reply': 'Stalled Reply',
+  'stale_one_touch': 'Stale 1-Touch',
+  'recent_one_touch': 'Recent 1-Touch',
   'blocked': 'Blocked',
 };
 

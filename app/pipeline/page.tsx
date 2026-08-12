@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { STAGES } from '@/lib/constants'
 
 export default async function Pipeline() {
   const supabase = await createClient()
@@ -14,30 +15,10 @@ export default async function Pipeline() {
     return <div className="p-6 text-red-600">Error loading pipeline: {error.message}</div>
   }
 
-  // All 16 pipeline stages in order
-  const allStages = [
-    'dm_sent',
-    'responded',
-    'phone',
-    'meeting',
-    'proposal',
-    'negotiation',
-    'contract_pending',
-    'contract_signed',
-    'deposit_pending',
-    'deposit_received',
-    'event_scheduled',
-    'stalled',
-    'lost',
-    'competitor',
-    'dnc',
-    'archived',
-  ]
-
   // Group by stage (including empty stages)
   const grouped: Record<string, any[]> = {}
 
-  allStages.forEach((stage) => {
+  STAGES.forEach((stage) => {
     grouped[stage] = []
   })
 
@@ -46,7 +27,7 @@ export default async function Pipeline() {
     grouped[ch.stage].push(ch)
   })
 
-  const stages = allStages
+  const stages = STAGES
 
   return (
     <div className="p-6">

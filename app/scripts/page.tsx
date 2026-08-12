@@ -3,33 +3,37 @@ import { createClient } from '@/lib/supabase/server'
 export default async function Scripts() {
   const supabase = await createClient()
 
-  // Get all chapters grouped by script_version
+  // Get chapters with script_version
   const { data: chapters } = await supabase
     .from('chapters')
     .select('id, script_version')
 
-  // Get all communications to count replies
-  const { data: communications } = await supabase
+  // Count sent (chapters with script_version) and replies (communications with direction='in')
+  const { data: scriptStats } = await supabase
+    .from('chapters')
+    .select('script_version')
+    .not('script_version', 'is', null)
+
+  const { data: replies } = await supabase
     .from('communications')
-    .select('chapter_id, type, direction')
+    .select('chapter_id, chapters(script_version)', { count: 'exact' })
+    .eq('direction', 'in')
 
   // Build funnel data
   const funnelMap: Record<string, { sent: number; replies: number }> = {}
 
+  // Count sent (chapters with each script_version)
   chapters?.forEach((ch: any) => {
     const version = ch.script_version || 'Unknown'
     if (!funnelMap[version]) funnelMap[version] = { sent: 0, replies: 0 }
     funnelMap[version].sent += 1
   })
 
-  communications?.forEach((comm: any) => {
-    const chapter = chapters?.find((ch: any) => ch.id === comm.chapter_id)
-    if (chapter) {
-      const version = chapter.script_version || 'Unknown'
-      // Count communications where direction='in' (incoming/reply)
-      if (funnelMap[version] && comm.direction === 'in') {
-        funnelMap[version].replies += 1
-      }
+  // Count replies (incoming communications grouped by chapter's script_version)
+  replies?.forEach((r: any) => {
+    const version = r.chapters?.script_version || 'Unknown'
+    if (funnelMap[version]) {
+      funnelMap[version].replies += 1
     }
   })
 
