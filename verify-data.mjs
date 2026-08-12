@@ -76,20 +76,27 @@ async function main() {
     }
     console.log('');
 
-    // Check schools
-    const { data: schools, error: schoolsError } = await supabase
+    // Check schools - count total
+    const { count: schoolCount, error: schoolCountError } = await supabase
+      .from('schools')
+      .select('id', { count: 'exact', head: true });
+
+    const { data: schoolsSample, error: schoolsError } = await supabase
       .from('schools')
       .select('id, name, tier, region')
       .limit(5);
 
-    console.log('Schools (first 5):');
-    if (schoolsError) {
-      console.error('Error:', schoolsError);
+    console.log('Schools:');
+    if (schoolCountError) {
+      console.error('Error counting:', schoolCountError);
     } else {
-      console.log(`Total schools accessible: ${schools?.length || 0}`);
-      if (schools?.length > 0) {
-        console.log(JSON.stringify(schools, null, 2));
-      }
+      console.log(`Total schools: ${schoolCount}`);
+    }
+    if (schoolsError) {
+      console.error('Error fetching sample:', schoolsError);
+    } else if (schoolsSample?.length > 0) {
+      console.log(`Sample (first 5):`);
+      console.log(JSON.stringify(schoolsSample, null, 2));
     }
     console.log('');
 

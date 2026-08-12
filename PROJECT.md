@@ -14,10 +14,15 @@ Full-stack CRM web application for managing fraternity chapter outreach, built w
 
 ### Protected Routes (proxy-gated)
 - **`/`** — TODAY QUEUE (home)
-  - Lists chapters with overdue next actions (next_action_date ≤ today, classification = 'active')
-  - Sorted by urgency (oldest first)
-  - Table columns: Fraternity, School, IG handle, Stage, Bucket, Next Action, Days Overdue, Action buttons
-  - Server-rendered with real Supabase data
+  - Lists chapters with actions due (next_action_date ≤ today, classification = 'active')
+  - Grouped by urgency: OVERDUE (red) | DUE TODAY (amber) | THIS WEEK (gray)
+  - Two-line row format: Fraternity + School + Tier badge; Action chip + Next action + Last contact
+  - Shows latest communication inline (direction + channel + truncated body)
+  - Shows assigned rep badge on each row
+  - Multi-select checkboxes for bulk operations
+  - Bulk "Assign to rep" action with dropdown
+  - Server-rendered via page.tsx + client-rendered TodayQueueClient component
+  - Filter by action type (send_dm, follow_up, call, etc.)
 
 - **`/pipeline`** — PIPELINE by Stage
   - Shows all 16 stages in order (including empty stages)
@@ -32,7 +37,8 @@ Full-stack CRM web application for managing fraternity chapter outreach, built w
   - Client component with bucket tabs (state-based tab switching)
   - 6 bucket tabs: Recent 1-Touch, Stale 1-Touch, Stalled Reply, Phone Handoff, Missed Warm, Blocked
   - Each tab loads chapters for that bucket via client-side query
-  - Shows next action and dates
+  - Shows assigned rep badge and latest communication inline
+  - Shows school tier, stage, next action, and next action date
   - Card links to chapter detail
   - Phone number shown inline for phone_handoff bucket
 
@@ -42,15 +48,20 @@ Full-stack CRM web application for managing fraternity chapter outreach, built w
   - Graceful error handling if view doesn't exist
 
 - **`/chapters/[id]`** — CHAPTER DETAIL
-  - Server-rendered chapter fetcher + layout
+  - Server-rendered chapter fetcher + layout with school, rep, and communications data
+  - Header: Fraternity name + School name + Tier badge + Region + "Verify before DM" warning
+  - TimelineAndForm component: Communications timeline above fold
+    - Newest first with inbound/outbound visual distinction (blue/green dots)
+    - Message logging form (channel, direction, date, body)
+    - Auto-updates chapter.last_contact on message save
+    - Timeline refreshes immediately with new message
   - ChapterEditor client component (editable fields)
+  - Sidebar: Assigned rep panel with name and email
   - Sidebar: Details panel (stage, classification, bucket, IG handle, script version)
   - Sidebar: Next Action panel (quick view)
   - Contacts section (fetched server-side, displays with phone/email/role)
-  - Communications Timeline section (fetched server-side, sorted by date descending)
   - All edits via client-side mutation (ChapterEditor)
-  - Stage and Script Version are dropdown selects (not free text) to prevent constraint violations
-  - Bucket is dropdown select with real bucket values
+  - Stage and Script Version are dropdown selects to prevent constraint violations
 
 ## File Structure
 
@@ -67,7 +78,9 @@ Full-stack CRM web application for managing fraternity chapter outreach, built w
   /chapters/[id]
     page.tsx                 # Chapter detail (server)
     ChapterEditor.tsx        # Editable chapter form (client)
-  page.tsx                   # TODAY QUEUE (server)
+    TimelineAndForm.tsx      # Communications timeline + message logging (client)
+  TodayQueueClient.tsx       # Interactive queue with multi-select, grouping, bulk assign (client)
+  page.tsx                   # TODAY QUEUE (server, calls TodayQueueClient)
   layout.tsx                 # Root layout with Header
 
 /components
@@ -145,16 +158,19 @@ const { data, error } = await supabase.from('chapters').update(...).eq('id', cha
 
 **chapters**
 - `id` (uuid, pk)
+- `school_id` (uuid, fk → schools)
 - `fraternity` (text)
 - `ig_handle` (text)
-- `stage` (text, CHECK constraint — 16 possible values)
+- `assigned_rep_id` (uuid, fk → reps)
+- `stage` (text, CHECK constraint)
 - `classification` (text, CHECK constraint)
 - `bucket` (text, CHECK constraint — one of 6 values)
 - `script_version` (text)
+- `last_contact` (date)
 - `next_action` (text)
+- `next_action_type` (text, CHECK constraint)
 - `next_action_date` (date)
 - `notes` (text)
-- `rep_id` (uuid, fk → reps)
 - `created_at`, `updated_at` (timestamps)
 
 **contacts**
@@ -169,11 +185,24 @@ const { data, error } = await supabase.from('chapters').update(...).eq('id', cha
 **communications**
 - `id` (uuid, pk)
 - `chapter_id` (uuid, fk → chapters)
-- `type` (text) — 'call', 'email', 'text', 'meeting', etc.
-- `subject` (text)
-- `notes` (text)
+- `contact_id` (uuid, fk → contacts, nullable)
+- `channel` (text) — 'instagram', 'email', 'text', 'call', etc.
+- `direction` (text) — 'in' (inbound) or 'out' (outbound)
+- `sent_on` (date)
+- `body` (text)
 - `created_at` (timestamp)
-- `created_by` (uuid, fk → reps)
+
+**schools**
+- `id` (uuid, pk)
+- `name` (text)
+- `state` (text)
+- `region` (text)
+- `tier` (text)
+- `outreach_track` (text)
+- `greek_rank` (text)
+- `prospect_status` (text)
+- `verify_before_dm` (text) — 'Yes', 'No', or null (added in migration 002)
+- `created_at`, `updated_at` (timestamps)
 
 **scripts**
 - `id` (uuid, pk)
@@ -184,9 +213,10 @@ const { data, error } = await supabase.from('chapters').update(...).eq('id', cha
 
 **reps**
 - `id` (uuid, pk)
-- `email` (text)
 - `name` (text)
-- `created_at` (timestamp)
+- `email` (text) — added in migration 002
+- `active` (boolean)
+- `created_at`, `updated_at` (timestamps)
 
 **script_funnel** (VIEW — needs to be created)
 - `script_version` (text)
@@ -252,18 +282,31 @@ npm run dev
 ## Key Design Decisions
 
 1. **Proxy over Middleware** — Next.js 16 deprecates `middleware.js` in favor of `proxy.js` for route protection and session management
-2. **Server-first architecture** — Server components fetch data, client components handle mutations only
-3. **No client-side state management** — React state only for form UX (ChapterEditor); Supabase is source of truth
+2. **Server-first architecture** — Server components fetch data, client components handle mutations and interactivity only
+3. **No client-side state management** — React state only for form UX; Supabase is source of truth
 4. **Cookie-based sessions** — Supabase Auth with httpOnly cookies prevents XSS attacks
-5. **Dense, mobile-first UI** — Tailwind CSS with compact tables and cards for sales rep workflows
-6. **Incremental builds** — Each page tested with real data before advancing
+5. **Dense, mobile-first UI** — Tailwind CSS with compact rows and cards for sales rep workflows
+6. **Efficient data queries** — Single query per page with Supabase relationships (schools, reps, communications) — no N+1 queries
+7. **Timeline-first detail views** — Communications moved above fold for prominence and quick context
+8. **Grouped urgency view** — Today Queue organized by OVERDUE/DUE TODAY/THIS WEEK for quick scanning
+
+## Recent Changes (Aug 2026)
+
+### Visual/Workflow Batch Implementation
+- **Rep Assignment** — Show rep on every chapter row, bulk assign via multi-select checkboxes
+- **Today Queue Restructure** — Group by urgency (OVERDUE/DUE TODAY/THIS WEEK), two-line dense row format
+- **Inline Conversation Context** — Display latest communication on each row (direction, channel, body preview)
+- **Chapter Detail Timeline** — Communications moved above fold with visual distinction (inbound/outbound)
+- **Message Logging** — Form to log new communications and auto-update last_contact date
+- **Database** — Reps now have email column (migration 002), schools have verify_before_dm flag
 
 ## Next Steps
 
-- Implement "Done" button and "Set Next" modal on TODAY QUEUE
-- Add contact/communication creation UI
-- Implement rep filter on Pipeline and Recovery pages
-- Add filtering by bucket on Pipeline page
+- "My Queue" filter fully functional (email-based rep filtering now enabled)
+- Implement "Done" button on TODAY QUEUE to mark chapters complete
+- Add "Set Next" modal for quick next action date updates
+- Bulk assign action on Recovery and Schools pages
+- Contact creation UI for chapters
 
 ## Deployment
 
