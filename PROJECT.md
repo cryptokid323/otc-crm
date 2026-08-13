@@ -325,7 +325,34 @@ npm run dev
 **Database Updates**
 - Added email column to reps table (migration 002)
 - Added verify_before_dm column to schools table (migration 002)
-- 611 total chapters, 3 reps, 211 schools
+- **620 total chapters** (611 original + 9 new from import), 3 reps, 211 schools
+- **1,121 total communications** (1,206 messages imported with 60 deduplicated)
+
+### Instagram Full-History Import ✓ COMPLETE (Aug 13, 2026)
+**Source:** Instagram export from Aug 6 2025 → Aug 6 2026, filtered to fraternity threads only
+
+**Import Summary:**
+- **9 new chapters created** (inferred school, matched via handle)
+  - 3 with identified schools: University of South Florida, Florida International University (×2), University of Tennessee Knoxville, University of Florida, Indiana University Bloomington
+  - 3 with "Unidentified" school: Sigma Chi Zeta Zeta, Pi Kappa Alpha, Tau Epsilon Phi
+- **544 chapters matched** from existing 611
+- **1,121 total communications** imported (inbound: 252, outbound: 748)
+  - 60 deduped (same chapter + same date + same body MD5)
+  - Deduplication ensures no exact duplicates within chapter
+- **132 chapters** have at least one inbound message
+- **67 chapters** with no thread in export (communications preserved)
+
+**Script Attribution (Corrected):**
+Real script counts from actual outbound messages (not chapter records):
+- Script A: 661 sent, 77 replies (11.6% reply rate)
+- Script B: 18 sent, 0 replies (0.0% reply rate)
+- Custom/Other: 225 sent, 13 replies (5.8% reply rate)
+
+**Data Integrity:**
+- Zero NULL sent_on or body values
+- All communications in chronological order by sent_on
+- last_contact updated for all 553 chapters with new messages
+- Chapters absent from import untouched (communications preserved)
 
 ## Next Steps
 
